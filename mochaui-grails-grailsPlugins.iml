@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="web" name="GrailsWeb">
+      <configuration>
+        <webroots>
+          <root url="file://C:/Users/cdoty.PO/.grails/1.2.2/projects/mochaui-grails/plugins/static-resources-0.5.1/web-app" relative="/" />
+        </webroots>
+        <sourceRoots />
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://C:/Users/cdoty.PO/.grails/1.2.2/projects/mochaui-grails/plugins/tomcat-1.2.2">
@@ -20,6 +30,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="grails-1.2.1" level="application" />
+    <orderEntry type="library" name="grails-1.2.2" level="application" />
   </component>
 </module>
 
