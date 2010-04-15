@@ -1,5 +1,6 @@
 import org.apache.catalina.loader.WebappLoader
 import net.contentobjects.jnotify.*
+import com.polaropposite.mochauigrails.FileChangeWatcher
 
 def watchID = -1
 
@@ -17,7 +18,6 @@ eventConfigureTomcat = {tomcat ->
   context.loader = loader
   loader.container = context
 
-
   // initialize file change notifications
   def path = new File("d:\\Data\\java\\mochaui\\src\\").getCanonicalPath()
   def mask = JNotify.FILE_CREATED  |
@@ -33,7 +33,6 @@ eventExiting = {
 }
 
 eventBuildMocha = { path->
-  println 'eventBuildMocha'
-  println path
+  //println path
 }
 

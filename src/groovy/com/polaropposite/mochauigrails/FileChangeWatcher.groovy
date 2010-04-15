@@ -1,8 +1,7 @@
+package com.polaropposite.mochauigrails
+
 import net.contentobjects.jnotify.JNotifyListener
 import java.util.concurrent.Semaphore
-
-includeTargets << grailsScript("_GrailsInit")
-includeTargets << grailsScript("_GrailsEvents")
 
 class FileChangeWatcher implements JNotifyListener {
     def onlyone = new Semaphore(1)
@@ -15,11 +14,11 @@ class FileChangeWatcher implements JNotifyListener {
         Thread.start {
           Thread.sleep(2000)
 
-          if(change=="renamed") println "renamed " + rootPath + " : " + oldName + " -> " + newName
-          if(change=="modified") println "modified " + rootPath + " : " + oldName
-          if(change=="deleted") println "deleted " + rootPath + " : " + oldName
-          if(change=="created")  println "created " + rootPath + " : " + oldName
-          event("BuildMocha", [rootPath])
+      //    if(change=="renamed") println "renamed " + rootPath + " : " + oldName + " -> " + newName
+      //    if(change=="modified") println "modified " + rootPath + " : " + oldName
+      //    if(change=="deleted") println "deleted " + rootPath + " : " + oldName
+      //    if(change=="created")  println "created " + rootPath + " : " + oldName
+          //event("BuildMocha", [rootPath])
 
           onlyone.release()
         }
