@@ -2,6 +2,9 @@ package com.polaropposite.mochauigrails
 
 import net.contentobjects.jnotify.JNotifyListener
 import java.util.concurrent.Semaphore
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+import grails.ant.GrailsTask
+import grails.util.GrailsUtil
 
 class FileChangeWatcher implements JNotifyListener {
     def onlyone = new Semaphore(1)
@@ -13,6 +16,28 @@ class FileChangeWatcher implements JNotifyListener {
       if(onlyone.tryAcquire()) {
         Thread.start {
           Thread.sleep(2000)
+
+          def task = new GrailsTask()
+          task.setScript("BuildMochaUI")
+          task.setEnvironment(GrailsUtil.environment)
+          def ref = new Reference()
+          ref.set(new File('./WEB-INF/classes').getCanonicalPath())
+          task.setClasspathRef(ref)
+          //task.classpath =
+          task.execute()
+          
+          //ApplicationHolder.application.parentContext.
+          //BuildMochaUI()
+/*          def build = new File(/scripts\BuildMochaUI.groovy/).getCanonicalFile()
+          // Execute the script
+          def cmd = ['grails', 'run-script', build]
+          Process executingProcess = cmd.execute()
+
+          // Read process output and print on console
+          def errorStreamPrinter = new StreamPrinter(executingProcess.err)
+          def outputStreamPrinter = new StreamPrinter(executingProcess.in)
+          [errorStreamPrinter, outputStreamPrinter]*.start()*/
+
 
       //    if(change=="renamed") println "renamed " + rootPath + " : " + oldName + " -> " + newName
       //    if(change=="modified") println "modified " + rootPath + " : " + oldName

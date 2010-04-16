@@ -4,22 +4,26 @@ import com.polaropposite.mochauigrails.FileChangeWatcher
 
 def watchID = -1
 
-eventConfigureTomcat = {tomcat ->
-  def contextRoot = "/mochaui"
-  def buildroot= "/mochaui-grails/WEB-INF/classes"
-  def webroot  = new File('../mochaui/demo').getCanonicalPath()
-
-  context = tomcat.addWebapp(contextRoot, webroot);
+createVirtualDirectory = { tomcat,name,path ->
+  buildroot= "/mochaui-grails/WEB-INF/classes"
+  webroot  = new File(path).getCanonicalPath()
+  context = tomcat.addWebapp(name, webroot);
   context.reloadable = true
-
   WebappLoader loader = new WebappLoader(tomcat.class.classLoader)
-
   loader.addRepository(new File(buildroot).toURI().toURL().toString());
   context.loader = loader
-  loader.container = context
+  loader.container = context  
+}  
+
+eventConfigureTomcat = {tomcat ->
+  createVirtualDirectory(tomcat,"/mochaui",'../mochaui/src/demo')
+  createVirtualDirectory(tomcat,"/mochaui/scripts",'../mochaui/src/demo/scripts')
+  createVirtualDirectory(tomcat,"/mochaui/scripts/source",'../mochaui/src/scripts')
+  createVirtualDirectory(tomcat,"/mochaui/themes",'../mochaui/src/themes')
+  createVirtualDirectory(tomcat,"/mochaui/plugins",'../mochaui/src/plugins')
 
   // initialize file change notifications
-  def path = new File("d:\\Data\\java\\mochaui\\src\\").getCanonicalPath()
+  def path = new File(/..\mochaui\src/).getCanonicalPath()
   def mask = JNotify.FILE_CREATED  |
               JNotify.FILE_DELETED  |
               JNotify.FILE_MODIFIED |
@@ -32,7 +36,4 @@ eventExiting = {
   if(watchID>-1) JNotify.removeWatch(watchID)
 }
 
-eventBuildMocha = { path->
-  //println path
-}
 

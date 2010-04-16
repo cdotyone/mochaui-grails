@@ -6,15 +6,70 @@ def mootoolsCore = "mootools-1.2.2-core-yc.js"
 def mootoolsCoreMod = null
 def mootoolsMore = "mootools-1.2.2-more-yc.js"
 def mootoolsMoreMod = null
+def mootoolsScriptsMod = null 
+def mootoolsScripts =
+  [
+    'Core/Core.js',
+    'Utilities/Themes.js',
+    'Window/Window.js',
+    'Window/Modal.js',
+    'Window/Windows-from-html.js',
+    'Window/Windows-from-json.js',
+    'Window/Arrange-cascade.js',
+    'Window/Arrange-tile.js',
+    'Components/Tabs.js',
+    'Layout/Layout.js',
+    'Layout/Dock.js',
+    'Layout/Workspaces.js'
+  ]
 
 removeOldMooTools = { from ->
   new File(from).eachFileRecurse() { file->
     jsname = file.getName()
     if(!file.isDirectory() && jsname.indexOf('mootools-')>=0 ) {
-      if(jsname!=mootoolsCore && jsname!=mootoolsMore)
+      if(jsname!=mootoolsCore && jsname!=mootoolsMore) {
         ant.delete(file:"${file.getAbsolutePath()}")
+      }
     }
   }
+}
+
+copyHTML = { from,to ->
+  println '     [copy] Copying 1 file to ' + to
+  def src = new File(from).text
+  def tag = '<!--MOCHAUI-->'
+  if(src.indexOf(tag)>-1) {
+    def firstPos = src.indexOf(tag)
+    def lastPos = src.indexOf(tag,firstPos+1)+tag.length()
+
+    if(firstPos<lastPos) {
+      def part1 = src.substring(0,firstPos)
+      def part2 = src.substring(lastPos)
+      src = part1
+      def indent = part1.substring(part1.length()-part1.reverse().indexOf('\n'))
+      src+='<script type="text/javascript" src="scripts/'+mootoolsCore+'"></script>\n'
+      src+=indent+'<script type="text/javascript" src="scripts/'+mootoolsMore+'"></script>\n'
+      src+=indent+'<script type="text/javascript" src="scripts/mocha.js"></script>'
+      src+=part2
+    }
+  }
+  new File(to) << src
+  new File(to).setLastModified(new File(from).lastModified())
+}
+
+copyFile = { from,to ->
+  def src=new File(from)
+  def dest=new File(to)
+  if(!dest.exists() || src.lastModified()>dest.lastModified()) {
+    println dest.getCanonicalFile() 
+    ant.copy(file:"${src.getCanonicalFile()}", tofile:"${dest.getCanonicalFile()}", overwrite: true, preservelastmodified:true)
+  }
+}
+
+copyMooTools = { from,to ->
+  s=File.separatorChar
+  copyFile(from+s+mootoolsCore,to+s+mootoolsCore)
+  copyFile(from+s+mootoolsMore,to+s+mootoolsMore)
 }
 
 copyResources = { from,to,fileType,clear,compress,exclude ->
@@ -33,11 +88,8 @@ copyResources = { from,to,fileType,clear,compress,exclude ->
         def srcfile = (from+s+file.getCanonicalPath()).replace(to,'')
         def file2 = new File(srcfile)
 
-        println srcfile
-        println file2.exists()
-
-        // does the file exist
-        if(!file2.exists()) {
+        // does the file exist, and is the directory not on the exclude list
+        if(!file2.exists() && !exclude.find {it -> srcfile.indexOf(from+s+it)>=0 }.any()) {
           ant.delete(file:"${file.getCanonicalPath()}")
         }
       }
@@ -70,8 +122,7 @@ copyResources = { from,to,fileType,clear,compress,exclude ->
 
         } else {
           if(fromFile.indexOf('.html')>0) {
-            println '     [copy] Copying 1 file to ' + tofile
-            new File(tofile) << new File(fromFile).text.replace('{mootools-core}',mootoolsCore).replace('{mootools-more}',mootoolsMore)
+            copyHTML(fromFile,tofile)
           } else {
             // copy the file
             ant.copy(file:"${fromFile}", tofile:"${tofile}", overwrite: true)
@@ -89,10 +140,10 @@ target(main: "Assemble mochaui.js") {
   s = File.separatorChar
 
   // resource directories
-  mooTools = new File(/..\mochaui\\src\\mootools/)
-  pluginsDir = new File(/..\mochaui\\src\\mochaui\\plugins/).getCanonicalPath()
-  themesDir = new File(/..\mochaui\\src\\mochaui\\themes/).getCanonicalPath()
-  demoDir = new File(/..\mochaui\\src\\mochaui\\demo/).getCanonicalPath()
+  mooTools = new File(/..\mochaui\\src\\scripts/)
+  pluginsDir = new File(/..\mochaui\\src\\plugins/).getCanonicalPath()
+  themesDir = new File(/..\mochaui\\src\\themes/).getCanonicalPath()
+  demoDir = new File(/..\mochaui\\src\\demo/).getCanonicalPath()
 
   // detect mootool filenames, so replace in demo section can happen
   mooTools.eachFile { file->
@@ -115,18 +166,18 @@ target(main: "Assemble mochaui.js") {
 
   //------------------------------------------------------
   // now copy themes and plugins to demo
-  copyResources(demoDir,new File(/..\mochaui\\demo/).getCanonicalPath(),'js',true,false,[pluginsDir,themesDir])
+  copyResources(demoDir,new File(/..\mochaui\\demo/).getCanonicalPath(),'js',true,false,[/plugins/,/themes/,/scripts/])
   copyResources(pluginsDir,new File(/..\mochaui\\demo\\plugins/).getCanonicalPath(),'js',true,false,[])
   copyResources(themesDir,new File(/..\mochaui\\demo\\themes/).getCanonicalPath(),'js',true,false,[])
   removeOldMooTools(demoJS)
-  copyResources(mooTools.getCanonicalPath(),demoJS,'js',false,false,[])
+  copyMooTools(mooTools.getCanonicalPath(),new File(/..\mochaui\\demo\\scripts/).getCanonicalPath())
 
   //------------------------------------------------------
   // now copy themes and plugins to the build folder
   copyResources(pluginsDir,new File(/..\mochaui\\build\\plugins/).getCanonicalPath(),'js',true,true,[])
   copyResources(themesDir,new File(/..\mochaui\\build\\themes/).getCanonicalPath(),'css',true,true,[])
   removeOldMooTools(buildJS)
-  copyResources(mooTools.getCanonicalPath(),buildJS,'js',false,true,[])
+  copyMooTools(mooTools.getCanonicalPath(),new File(/..\mochaui\\build/).getCanonicalPath())
 
 
   //------------------------------------------------------
@@ -134,52 +185,57 @@ target(main: "Assemble mochaui.js") {
   licenseFile = new File(/..\mochaui\MIT-LICENSE.txt/).getCanonicalPath()
   authorsFile = new File(/..\mochaui\Authors.txt/).getCanonicalPath()
 
-  dest=new File(/..\mochaui\\demo\scripts\mocha.js/)
-  dir1=new File(/..\mochaui\src\mochaui\js/).getCanonicalPath()+s
-  jsfiles = /Core\Core.js/
-
-  // clear the demo mocha.js
-  println ' [clearing]  ' + dest.getCanonicalPath()
-  if(dest.exists()) dest.delete()
-  dest.createNewFile()
-
-  // append the license file to the mocha.js, add js comments to keep from being removed by compressor
-  dest << "/*!\n" + (new File(licenseFile).text) + "\n*/\n"
-
   // make sure license files are in the same folder as mocha.js in demo
-  ant.copy(file:"${licenseFile}", tofile:/..\mochaui\\demo\scripts\MIT-LICENSE.txt/, overwrite: true)
-  ant.copy(file:"${authorsFile}", tofile:/..\mochaui\\demo\scripts\AUTHORS.txt/, overwrite: true)
+  copyFile(licenseFile,/..\mochaui\\demo\scripts\MIT-LICENSE.txt/)
+  copyFile(authorsFile,/..\mochaui\\demo\scripts\AUTHORS.txt/)
 
   // make sure license files are in the same folder as mocha.js in build
-  ant.copy(file:"${licenseFile}", tofile:/..\mochaui\\build\\MIT-LICENSE.txt/, overwrite: true)
-  ant.copy(file:"${authorsFile}", tofile:/..\mochaui\\build\AUTHORS.txt/, overwrite: true)
+  copyFile(licenseFile,/..\mochaui\\build\MIT-LICENSE.txt/)
+  copyFile(authorsFile,/..\mochaui\\build\AUTHORS.txt/)
 
+  
+  //----------------------------------------------------------
   // create the demo mocha.js that is not compressed
-  [
-    'Core/Core.js',
-    'Utilities/Themes.js',
-    'Window/Window.js',
-    'Window/Modal.js',
-    'Window/Windows-from-html.js',
-    'Window/Windows-from-json.js',
-    'Window/Arrange-cascade.js',
-    'Window/Arrange-tile.js',
-    'Components/Tabs.js',
-    'Layout/Layout.js',
-    'Layout/Dock.js',
-    'Layout/Workspaces.js'
-  ].each {
-    println '[appending] ' + it
+  dest=new File(/..\mochaui\demo\scripts\mocha.js/)
+  dir1=new File(/..\mochaui\src\scripts/).getCanonicalPath()+s
+
+  // first see if any of the files have changed
+  mootoolsScripts.each {
     src=new File(dir1+it)
-    dest << src.text
+    if(mootoolsScriptsMod==null || src.lastModified()>mootoolsScriptsMod)
+      mootoolsScriptsMod = src.lastModified()
   }
 
+  if(!dest.exists() || dest.lastModified()<mootoolsScriptsMod ) {
+    // clear the demo mocha.js
+    println ' [clearing]  ' + dest.getCanonicalPath()
+    if(dest.exists()) dest.delete()
+    dest.createNewFile()
+
+    // append the license file to the mocha.js, add js comments to keep from being removed by compressor
+    dest << "/*!\n" + (new File(licenseFile).text) + "\n*/\n"
+
+    // create the demo mocha.js that is not compressed
+    mootoolsScripts.each {
+      println '[appending] ' + it
+      src=new File(dir1+it)
+      dest << src.text
+    }
+
+    dest.setLastModified(mootoolsScriptsMod)
+  }
+  
   // we need to compress so fire off a command to execute the yuicompressor
-  toJS = new File(/..\mochaui\\build\mocha.js/).getCanonicalPath()
-  fromJS = dest.getCanonicalPath()
-  println ' [compress] ' +fromJS+' to '+toJS
-  command = "java -jar "+new File('.').getCanonicalPath()+s+"lib"+s+"yuicompressor-2.4.2.jar -o ${toJS} ${fromJS}"
-  command.execute().waitFor()     // Call *execute* on the string  
+  toJSFile = new File(/..\mochaui\\build\mocha.js/)
+  if(toJSFile.lastModified() < dest.lastModified()) {
+    toJS = toJSFile.getCanonicalPath()
+    fromJS = dest.getCanonicalPath()
+    println ' [compress] ' +fromJS+' to '+toJS
+    command = "java -jar "+new File('.').getCanonicalPath()+s+"lib"+s+"yuicompressor-2.4.2.jar -o ${toJS} ${fromJS}"
+    command.execute().waitFor()     // Call *execute* on the string
+
+    toJSFile.setLastModified(dest.lastModified())
+  }
 }
 
 setDefaultTarget(main)
