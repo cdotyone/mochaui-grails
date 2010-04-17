@@ -15,36 +15,10 @@ class FileChangeWatcher implements JNotifyListener {
 
       if(onlyone.tryAcquire()) {
         Thread.start {
-          Thread.sleep(2000)
+          Thread.sleep(3000)
 
-          def task = new GrailsTask()
-          task.setScript("BuildMochaUI")
-          task.setEnvironment(GrailsUtil.environment)
-          def ref = new Reference()
-          ref.set(new File('./WEB-INF/classes').getCanonicalPath())
-          task.setClasspathRef(ref)
-          //task.classpath =
-          task.execute()
+          new BuildMochaUI()
           
-          //ApplicationHolder.application.parentContext.
-          //BuildMochaUI()
-/*          def build = new File(/scripts\BuildMochaUI.groovy/).getCanonicalFile()
-          // Execute the script
-          def cmd = ['grails', 'run-script', build]
-          Process executingProcess = cmd.execute()
-
-          // Read process output and print on console
-          def errorStreamPrinter = new StreamPrinter(executingProcess.err)
-          def outputStreamPrinter = new StreamPrinter(executingProcess.in)
-          [errorStreamPrinter, outputStreamPrinter]*.start()*/
-
-
-      //    if(change=="renamed") println "renamed " + rootPath + " : " + oldName + " -> " + newName
-      //    if(change=="modified") println "modified " + rootPath + " : " + oldName
-      //    if(change=="deleted") println "deleted " + rootPath + " : " + oldName
-      //    if(change=="created")  println "created " + rootPath + " : " + oldName
-          //event("BuildMocha", [rootPath])
-
           onlyone.release()
         }
       }
