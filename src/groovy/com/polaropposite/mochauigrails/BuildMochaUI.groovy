@@ -61,7 +61,6 @@ def copyFile = { from,to ->
   def src=new File(from)
   def dest=new File(to)
   if(!dest.exists() || src.lastModified()>dest.lastModified()) {
-    println dest.getCanonicalFile()
     ant.copy(file:"${src.getCanonicalFile()}", tofile:"${dest.getCanonicalFile()}", overwrite: true, preservelastmodified:true)
   }
 }
