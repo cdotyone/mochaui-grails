@@ -1,6 +1,5 @@
 import org.apache.catalina.loader.WebappLoader
-import net.contentobjects.jnotify.*
-import com.polaropposite.mochauigrails.FileChangeWatcher
+import com.polaropposite.mochaui.buid.BuildMochaUI
 
 def watchID = -1
 
@@ -23,18 +22,13 @@ eventConfigureTomcat = {tomcat ->
   createVirtualDirectory(tomcat,"/mochaui/themes",'../mochaui/src/themes')
   createVirtualDirectory(tomcat,"/mochaui/plugins",'../mochaui/src/plugins')
 
-  // initialize file change notifications
-  def path = new File(/..\mochaui\src/).getCanonicalPath()
-  def mask = JNotify.FILE_CREATED  |
-              JNotify.FILE_DELETED  |
-              JNotify.FILE_MODIFIED |
-              JNotify.FILE_RENAMED;
 
-  watchID = JNotify.addWatch(path, mask, true, new FileChangeWatcher())  
+  def path = (new File("../mochaui/")).getCanonicalPath()
+  watchID = BuildMochaUI.Watch(path,false)
 }
 
 eventExiting = {
-  if(watchID>-1) JNotify.removeWatch(watchID)
+  if(watchID>-1) BuildMochaUI.StopWatch(watchID)
 }
 
 

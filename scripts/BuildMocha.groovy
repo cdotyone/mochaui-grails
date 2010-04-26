@@ -1,9 +1,10 @@
-import com.polaropposite.mochauigrails.BuildMochaUI
+import com.polaropposite.mochaui.buid.BuildMochaUI
 
 includeTargets << grailsScript("Init")
 
 target(main: "Assemble mochaui.js") {
-  new BuildMochaUI()
+  def path = (new File("../mochaui/")).getCanonicalPath()
+  BuildMochaUI.Rebuild(path,true)
 }
 
 setDefaultTarget(main)
