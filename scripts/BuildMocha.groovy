@@ -1,4 +1,4 @@
-import com.polaropposite.mochaui.buid.BuildMochaUI
+import com.polaropposite.mochaui.build.BuildMochaUI
 
 includeTargets << grailsScript("Init")
 

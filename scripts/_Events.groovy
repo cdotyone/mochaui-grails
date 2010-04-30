@@ -1,5 +1,5 @@
 import org.apache.catalina.loader.WebappLoader
-import com.polaropposite.mochaui.buid.BuildMochaUI
+import com.polaropposite.mochaui.build.BuildMochaUI
 
 def watchID = -1
 
