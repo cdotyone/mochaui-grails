@@ -17,15 +17,6 @@ createVirtualDirectory = { tomcat,name,path ->
 
 eventConfigureTomcat = {tomcat ->
   createVirtualDirectory(tomcat,"/mochaui",'../mochaui/src/')
-/*
-
-createVirtualDirectory(tomcat,"/mochaui/scripts",'../mochaui/src/demo/scripts')
-createVirtualDirectory(tomcat,"/mochaui/scripts/source",'../mochaui/src/core')
-createVirtualDirectory(tomcat,"/mochaui/themes",'../mochaui/src/themes')
-createVirtualDirectory(tomcat,"/mochaui/plugins",'../mochaui/src/plugins')
-
-*/
-
 
   def path = (new File("../mochaui/")).getCanonicalPath()
   //watchID = BuildMochaUI.Watch(path,false)
