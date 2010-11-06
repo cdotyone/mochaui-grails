@@ -48,10 +48,10 @@ environments {
         grails.serverURL = "http://www.changeme.com"
     }
     development {
-        grails.serverURL = "http://localhost:8083/mochaui"
+        grails.serverURL = "http://localhost:8083/"
     }
     test {
-        grails.serverURL = "http://localhost:8083/mochaui"
+        grails.serverURL = "http://localhost:8083/"
     }
 
 }
