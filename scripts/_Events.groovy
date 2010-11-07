@@ -1,7 +1,4 @@
 import org.apache.catalina.loader.WebappLoader
-import com.polaropposite.mochaui.build.BuildMochaUI
-
-def watchID = -1
 
 createVirtualDirectory = { tomcat,name,path ->
   buildroot= "/mochaui-grails/WEB-INF/classes"
@@ -16,14 +13,7 @@ createVirtualDirectory = { tomcat,name,path ->
 }  
 
 eventConfigureTomcat = {tomcat ->
-  createVirtualDirectory(tomcat,"/mochaui",'../mochaui/')
-
-  def path = (new File("../mochaui/")).getCanonicalPath()
-  //watchID = BuildMochaUI.Watch(path,false)
-}
-
-eventExiting = {
-  if(watchID>-1) BuildMochaUI.StopWatch(watchID)
+  createVirtualDirectory(tomcat,"/",'../mochaui/')
 }
 
 
