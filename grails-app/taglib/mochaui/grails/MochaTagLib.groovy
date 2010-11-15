@@ -2,6 +2,6 @@ package mochaui.grails
 
 class MochaTagLib {
   def redirectDemoPage = {
-    response.sendRedirect("/mochaui/")
+    response.sendRedirect("/index.html")
   }
 }
