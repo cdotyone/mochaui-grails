@@ -14,7 +14,6 @@ createVirtualDirectory = { tomcat,name,path ->
 
 eventConfigureTomcat = {tomcat ->
   	createVirtualDirectory(tomcat,"/",'../mochaui/')
-	createVirtualDirectory(tomcat,"/meio-mask",'../meio-mask/')
 }
 
 

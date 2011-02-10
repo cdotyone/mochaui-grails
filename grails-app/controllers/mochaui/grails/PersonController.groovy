@@ -24,13 +24,17 @@ class PersonController{
 
 		// determine the page size
 		if(!params.max) params.max = 10
-		def pageSize = params.max = params.max.toString().toInteger()
+		def pageSize = params.max.toString().toInteger()
+		if(pageSize<=0) pageSize=10
+		params.max=pageSize
 
 		// translate the page # to a offset
 		if(params.page) params.offset = (params.page.toString().toInteger()-1)*pageSize
 
 		// if there is no offset start at record 1
-		if(!params.offset) params.offset = 0
+		if(!params.offset || params.offset<0) params.offset = 0
+		if(!params.sort || params.sort=='') params.sort = 'name'
+		if(!params.order || params.order=='') params.order = 'asc'
 
 		def offset = params.offset.toString().toInteger()
 		def total = Person.count()
